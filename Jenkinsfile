@@ -14,7 +14,7 @@ pipeline {
             }
             steps {
                 script {
-                    app = docker.build("docker2mfried/train-schedule-docker")
+                    app = docker.build("docker2mfried/train-schedule-docker-2lab")
                     app.inside {
                         sh 'echo $(curl localhost:8080)'
                     }
@@ -41,16 +41,16 @@ pipeline {
             steps {
                 input 'Deploy to Production?'
                 milestone(1)
-                withCredentials([usernamePassword(credentialsId: 'docker_production_login', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'webserver_login', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
                     script {
-                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker pull docker2mfried/train-schedule-docker:${env.BUILD_NUMBER}\""
+                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker pull docker2mfried/train-schedule-docker-2lab:${env.BUILD_NUMBER}\""
                         try {
-                            sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker stop train-schedule-docker\""
-                            sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker rm train-schedule-docker\""
+                            sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker stop train-schedule-docker-2lab\""
+                            sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker rm train-schedule-docker-2lab\""
                         } catch (err) {
                             echo: 'caught error: $err'
                         }
-                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker run --restart always --name train-schedule-docker -p 8080:8080 -d docker2mfried/train-schedule-docker:${env.BUILD_NUMBER}\""
+                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker run --restart always --name train-schedule-docker-2lab -p 8080:8080 -d docker2mfried/train-schedule-docker-2lab:${env.BUILD_NUMBER}\""
                     }
                 }
             }
